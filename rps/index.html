@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>RPS Shoot</title>
+	<link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
+</head>
+<body>
+	<canvas id="myCanvas" style="border:1px solid #d3d3d3;" width= "1500" height="730"></canvas>
+	<img src="images\icon-rock.png" id="rock">
+	<img src="images\icon-paper.png" id="paper">
+	<img src="images\icon-scissors.png" id="scissor">
+	<script>
+		const canvas=document.getElementById("myCanvas");
+		const ctx = canvas.getContext("2d");
+		const rock = document.getElementById("rock");
+		rock.style.visibility="hidden";
+		const paper = document.getElementById("paper");
+		paper.style.visibility="hidden";
+		const scissor = document.getElementById("scissor");
+		scissor.style.visibility="hidden";
+		var score=0;
+		function drawback() {
+			var x = 760, y = 365, innerRadius = 5, outerRadius = 400, radius = 900;
+			var gradient = ctx.createRadialGradient(x, y, innerRadius, x, y, outerRadius);
+			gradient.addColorStop(0, '#3434cb');
+			gradient.addColorStop(1, "#1f1f7a");
+			ctx.arc(x, y, radius, 0, 2 * Math.PI);
+			ctx.fillStyle = gradient;
+			ctx.fill();
+			ctx.beginPath();
+			ctx.lineWidth = "3";
+			ctx.strokeStyle = "white";
+			ctx.rect(460, 30, 600, 100);
+			ctx.stroke();
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("Rock", 470, 57);
+			ctx.fillText("Paper", 470, 89);
+			ctx.fillText("Scissor", 470, 121);
+			ctx.beginPath();
+			ctx.fillRect(950,40,100,80);
+			ctx.stroke();
+			ctx.fillStyle = "Black";
+			ctx.fillText(score, 990, 80);
+		}
+		function drawTriangle() {
+			ctx.beginPath();
+			ctx.lineWidth = "8";
+			ctx.strokeStyle = "gray";
+		    ctx.moveTo(610,365);
+		    ctx.lineTo(760,565);
+		    ctx.lineTo(910,365);
+		    ctx.lineTo(610,365);
+		    ctx.stroke();
+		}
+		function drawrock(a,b,r) {
+			ctx.beginPath();
+			ctx.fillStyle = "white";
+			ctx.lineWidth = "32";
+			ctx.strokeStyle = "orange";
+			ctx.arc(a, b, r, 0, 2 * Math.PI);
+			ctx.stroke();
+			ctx.fill();	
+		}
+		function clickevent(event) {
+			if(event.pageX > 575 && event.pageX < 645 && event.pageY > 330 && event.pageY < 410) {
+				draw2(rock,1);
+			}
+			if(event.pageX > 875 && event.pageX < 945 && event.pageY > 330 && event.pageY < 410) {
+				draw2(paper,2);
+			}
+			if(event.pageX > 725 && event.pageX < 795 && event.pageY > 530 && event.pageY < 610) {
+				draw2(scissor,3);
+			}
+		}
+		function drawh() {
+			drawback();
+			drawTriangle();
+			drawrock(610,365,50);
+			drawrock(760,565,50);
+			drawrock(910,365,50);
+			setTimeout(function() {
+				ctx.drawImage(rock,585,340,50,50);
+				ctx.drawImage(paper,885,340,50,50);
+				ctx.drawImage(scissor,735,540,50,50);
+			}, 10);
+			canvas.addEventListener('click', clickevent);
+		}
+		function draw2(a,y) {
+			canvas.removeEventListener('click', clickevent);
+			drawback();
+			drawrock(380,465,100);
+			ctx.drawImage(a,330,420,90,90);
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.arc(1040, 465, 100, 0, 2 * Math.PI);
+			ctx.fill();
+			var x = Math.ceil(Math.random()*3);
+			ctx.fillStyle = "white";
+			ctx.fillText("You Picked", 300, 300);
+			ctx.fillText("House Picked", 950, 300);
+			var z = 0;
+			var game = window.setInterval( function() {
+				drawback();
+				drawrock(380,465,100);
+				ctx.drawImage(a,330,420,90,90);
+				ctx.beginPath();
+				ctx.fillStyle = "black";
+				ctx.arc(1040, 465, 100, 0, 2 * Math.PI);
+				ctx.fill();
+				ctx.fillStyle = "white";
+				ctx.fillText("You Picked", 300, 300);
+				ctx.fillText("House Picked", 950, 300);
+				drawrock(1040,465,100);
+				z++;
+				z%=3;
+				if(z == 0) {
+					ctx.drawImage(rock,990,420,90,90);
+				}
+				else if(z == 1) {
+					ctx.drawImage(paper,990,420,90,90);
+				}
+				else {
+					ctx.drawImage(scissor,990,420,90,90);
+				}
+			}, 100);
+			setTimeout(function() {
+				window.clearInterval(game);
+				drawrock(1040,465,100);
+				if(x == 1) {
+					ctx.drawImage(rock,990,420,90,90);
+				}
+				else if(x == 2) {
+					ctx.drawImage(paper,990,420,90,90);
+				}
+				else {
+					ctx.drawImage(scissor,990,420,90,90);
+				}
+			},1500);
+			setTimeout(function() {
+				ctx.fillStyle="white";
+				if(y == x) {
+					ctx.fillText("Draw", 680, 465);
+				}
+				else if((y == 1 && x ==2) || (y == 2 && x == 3) || (y == 3 && x == 1)) {
+					ctx.fillText("You Lose", 680, 465);
+				}
+				else {
+					ctx.fillText("You Win", 680, 465);
+					score++;				
+				}
+			},2000);
+			setTimeout(drawh,4000);
+		}
+		drawh();
+	</script>
+</body>
+</html>
