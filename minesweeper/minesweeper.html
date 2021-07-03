@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Minesweeper</title>
+</head>
+<body style="margin: 0px">
+	<canvas width="900px" height="700px" id="mycanvas" style="border: 1px solid black;"></canvas>
+	<img src="flag.png" id="flag">
+	<script>
+		const canvas = document.getElementById("mycanvas");
+		const ctx = canvas.getContext("2d");
+		const flagimg = document.getElementById("flag");
+		flagimg.style.visibility="hidden";
+		var boxlength = 50;
+		var mine = 20;
+		var margin = 20;
+		var no_of_rows = 10;
+		var no_of_cols = 12;
+		var no_of_flags = mine;
+		var field = new Array(12).fill(0).map(() => new Array(10).fill(0));
+		var open = new Array(12).fill(0).map(() => new Array(10).fill(0));
+		var firstClick = false;
+		var gamewin = false;
+		function drawflag() {
+			setTimeout(function() {
+				ctx.drawImage(flagimg, margin+boxlength*12+5, margin+5+boxlength*2, boxlength-10,boxlength-10);
+			},10);
+			if(firstClick == false) {
+				ctx.beginPath();	
+				ctx.font = "40px Arial";
+				ctx.fillStyle = "Black";
+				ctx.fillText(no_of_flags , margin+boxlength*13+5,  margin+5+boxlength*2.68);
+				ctx.stroke();
+			}
+		}
+		function setmine() {
+			if(firstClick == false) {
+				ctx.beginPath();	
+				ctx.font = "30px Arial";
+				ctx.fillStyle = "Green";
+				ctx.fillText("Easy" , margin+boxlength*12+5,  margin+5+boxlength*6);
+				ctx.fillStyle = "Orange";
+				ctx.fillText("Medium" , margin+boxlength*12+5,  margin+5+boxlength*7.5);
+				ctx.fillStyle = "Red";
+				ctx.fillText("Hard" , margin+boxlength*12+5,  margin+5+boxlength*9);
+				ctx.stroke();
+				canvas.addEventListener("click", selectLevel);
+			}
+		}
+		function drawbomb(x,y) {
+			ctx.beginPath();
+			ctx.fillStyle = "rgb(0,0,0)";
+			ctx.fillRect(margin+boxlength*y, margin+boxlength*x, boxlength, boxlength);
+			ctx.fillStyle = "rgb(77, 77, 77)";
+			ctx.arc(margin+boxlength*y+boxlength/2, margin+boxlength*x+boxlength/2, boxlength/4, 0, 2*Math.PI);
+			ctx.fill();
+			ctx.stroke();
+			for(var i = 0; i < 12; i++) {
+				for(var j = 0; j < 10; j++) {
+					if(field[i][j] == -1) {
+						ctx.beginPath();
+						ctx.fillStyle = "rgb(0,0,0)";
+						ctx.fillRect(margin+boxlength*j, margin+boxlength*i, boxlength, boxlength);
+						ctx.fillStyle = "rgb(77, 77, 77)";
+						ctx.arc(margin+boxlength*j+boxlength/2, margin+boxlength*i+boxlength/2, boxlength/4, 0, 2*Math.PI);
+						ctx.fill();
+						ctx.stroke();
+					}
+				}
+			}
+		}
+		function gamefinish() {
+			var count = 0;
+			for(var i = 0; i < 12; i++) {
+				for(var j = 0; j < 10; j++) {
+					if(open[i][j] == 0 || open[i][j] == -1) count++;
+				}
+			}
+			if(count == mine) {
+				canvas.removeEventListener("click", eventClick);
+				canvas.removeEventListener("contextmenu", eventRightClick);
+				gamewin = true;
+				gameover();
+			}
+		}
+		function gameover() {
+			for(var i = 0; i < 12; i++) {
+				for(var j = 0; j < 10; j++) {
+					field[i][j]=0;
+					open[i][j]=0;
+				}
+			}
+			firstClick=false;
+			no_of_flags=mine;
+			ctx.clearRect(0,0,900,700);
+			ctx.beginPath();	
+			ctx.font = "60px Arial";
+			if(gamewin) {
+				gamewin = false;
+				ctx.fillStyle = "Green";
+				ctx.fillText("You win" , 900/2 - 110, 700/2 - 30);
+			}
+			else {
+				ctx.fillStyle = "Red";
+				ctx.fillText("You lose" , 900/2 - 110, 700/2 - 30);
+			}
+			ctx.font = "40px Arial";
+			ctx.fillText("Play Again" , 900/2 - 100, 700/2 + 50);
+			ctx.stroke();
+			canvas.addEventListener("click", playButtonClicked);
+		}
+		function boxClicked(x,y) {
+			if(field[x][y] == -1) {
+				drawbomb(x,y);
+				canvas.removeEventListener("click", eventClick);
+				canvas.removeEventListener("contextmenu", eventRightClick);
+				setTimeout(gameover, 3000);
+				return ;
+			}
+			open[x][y] = 1;
+			if(field[x][y] == 0) {
+				if(x != 0 && y != 0 && field[x-1][y-1] != -1 && open[x-1][y-1] == 0) boxClicked(x-1,y-1);
+				if(x != 0 && field[x-1][y] != -1 && open[x-1][y] == 0) boxClicked(x-1,y);
+				if(x != 0 && y != 9 && field[x-1][y+1] != -1 && open[x-1][y+1] == 0) boxClicked(x-1,y+1);
+				if(y != 0 && field[x][y-1] != -1 && open[x][y-1] == 0) boxClicked(x,y-1);
+				if(y != 9 && field[x][y+1] != -1 && open[x][y+1] == 0) boxClicked(x,y+1);
+				if(x != 11 && y != 0 && field[x+1][y-1] != -1 && open[x+1][y-1] == 0) boxClicked(x+1,y-1);
+				if(x != 11 && field[x+1][y] != -1 && open[x+1][y] == 0) boxClicked(x+1,y);
+				if(x != 11 && y != 9 && field[x+1][y+1] != -1 && open[x+1][y+1] == 0) boxClicked(x+1,y+1);
+			}
+			if((x+y) %2 == 0) {
+				ctx.fillStyle = "rgb(224, 219, 153)";
+			}
+			else {
+				ctx.fillStyle = "rgb(240, 235, 175)";
+			}
+			ctx.fillRect(margin+y*boxlength, margin+x*boxlength, boxlength, boxlength);
+			ctx.font = "30px Arial";
+			ctx.fillStyle="black";
+			if(field[x][y] != 0 && field[x][y] != -1) ctx.fillText(field[x][y],margin+15+y*boxlength, margin+35+x*boxlength);
+			gamefinish();
+		}
+		function boxClickedInitial(i,j) {
+			var k;
+			for(k = 0; k < mine; k++) {
+				const x = Math.ceil(Math.random()*12) - 1;
+				const y = Math.ceil(Math.random()*10) - 1;
+				if((x >= i-1 && x <= i+1 && y >= j-1 && y <= j+1) || field[x][y] == -1) {
+					k--;
+				}
+				else {
+					field[x][y]=-1;
+					if(x != 0 && y != 0 && field[x-1][y-1] != -1) field[x-1][y-1]++;
+					if(x != 0 && field[x-1][y] != -1) field[x-1][y]++;
+					if(x != 0 && y != 9 && field[x-1][y+1] != -1) field[x-1][y+1]++;
+					if(y != 0 && field[x][y-1] != -1) field[x][y-1]++;
+					if(y != 9 && field[x][y+1] != -1) field[x][y+1]++;
+					if(x != 11 && y != 0 && field[x+1][y-1] != -1) field[x+1][y-1]++;
+					if(x != 11 && field[x+1][y] != -1) field[x+1][y]++;
+					if(x != 11 && y != 9 && field[x+1][y+1] != -1) field[x+1][y+1]++;
+				}
+			}
+			gamestart = true;
+			boxClicked(i,j);
+			canvas.removeEventListener("click", selectLevel);
+			canvas.addEventListener("contextmenu", eventRightClick);
+			gamefinish();
+		}
+		function drawbox() {
+			for(var i = 0; i < 12; i++) {
+				for(var j = 0; j < 10; j++) {
+					const y = margin+i*boxlength;
+					const x = margin+j*boxlength;
+					if((i+j) % 2 == 0) {
+						ctx.fillStyle = "rgb(98, 209, 13)";
+					}
+					else {
+						ctx.fillStyle = "rgb(130, 240, 46)";
+					}
+					ctx.fillRect(x, y, boxlength, boxlength);
+				}
+			}
+			canvas.addEventListener("click", eventClick);
+		}
+		function draw() {
+			canvas.removeEventListener('click', playButtonClicked);
+			drawbox();
+			drawflag();
+			setmine();
+		}
+		function selectLevel() {
+			if(event.pageX >= margin+boxlength*12+5 && event.pageX <= margin+boxlength*12+80 && event.pageY >= margin-20+boxlength*6 && event.pageY <= margin+15+boxlength*6) {
+				mine = 10;
+				no_of_flags = mine;
+				ctx.clearRect(margin+boxlength*13+5,margin+5+boxlength*2,100,50);
+				ctx.beginPath();	
+				ctx.font = "40px Arial";
+				ctx.fillStyle = "Black";
+				ctx.fillText(no_of_flags , margin+boxlength*13+5,  margin+5+boxlength*2.68);
+				ctx.stroke();
+			}
+			else if(event.pageX >= margin+boxlength*12+5 && event.pageX <= margin+boxlength*12+120 && event.pageY >= margin+55+boxlength*6 && event.pageY <= margin+90+boxlength*6) {
+				mine = 20;
+				no_of_flags = mine;
+				ctx.clearRect(margin+boxlength*13+5,margin+5+boxlength*2,100,50);
+				ctx.beginPath();	
+				ctx.font = "40px Arial";
+				ctx.fillStyle = "Black";
+				ctx.fillText(no_of_flags , margin+boxlength*13+5,  margin+5+boxlength*2.68);
+				ctx.stroke();
+			} else if(event.pageX >= margin+boxlength*12+5 && event.pageX <= margin+boxlength*12+80 && event.pageY >= margin+130+boxlength*6 && event.pageY <= margin+165+boxlength*6) {
+				mine = 30;
+				no_of_flags = mine;
+				ctx.clearRect(margin+boxlength*13+5,margin+5+boxlength*2,100,50);
+				ctx.beginPath();	
+				ctx.font = "40px Arial";
+				ctx.fillStyle = "Black";
+				ctx.fillText(no_of_flags , margin+boxlength*13+5,  margin+5+boxlength*2.68);
+				ctx.stroke();
+			}
+		}
+		function eventClick(event) {
+			for(var i = 0; i < 12; i++) {
+				for(var j = 0; j < 10; j++) {
+					const y = margin+i*boxlength;
+					const x = margin+j*boxlength;
+					if(event.pageX >= x && event.pageX <= x+boxlength && event.pageY >= y && event.pageY <= y+boxlength) {
+						const X=Math.floor((event.pageY-margin)/boxlength);
+						const Y=Math.floor((event.pageX-margin)/boxlength)
+						if(firstClick == false) {
+							firstClick = true;
+							boxClickedInitial(X,Y);
+						}
+						else if(open[X][Y] == 0) {
+							boxClicked(X,Y);
+						}
+					}
+				}
+			}
+		}
+		function eventRightClick(event) { 
+			for(var i = 0; i < 12; i++) {
+				for(var j = 0; j < 10; j++) {
+					const x = margin+j*boxlength;
+					const y = margin+i*boxlength;
+					if(event.pageX >= x && event.pageX <= x+boxlength && event.pageY >= y && event.pageY <= y+boxlength) {
+						const X=Math.floor((event.pageY-margin)/boxlength);
+						const Y=Math.floor((event.pageX-margin)/boxlength)
+						if(open[X][Y] == 0) {
+							setTimeout(function() {
+								ctx.drawImage(flagimg, margin+5+boxlength*Y, margin+5+boxlength*X, boxlength-10,boxlength-10);
+							},10);
+							open[X][Y] = -1;
+							no_of_flags--;
+						}
+						else if(open[X][Y]==-1) {
+							if((X+Y) %2 == 0) {
+								ctx.fillStyle = "rgb(98, 209, 13)";
+							}
+							else {
+								ctx.fillStyle = "rgb(130, 240, 46)";
+							}
+							ctx.fillRect(x, y, boxlength, boxlength);
+							open[X][Y] = 0;
+							no_of_flags++;
+						}
+						ctx.clearRect(margin+boxlength*13+5,margin+5+boxlength*2,100,50);
+						ctx.beginPath();	
+						ctx.font = "40px Arial";
+						ctx.fillStyle = "Black";
+						ctx.fillText(no_of_flags , margin+boxlength*13+5,  margin+5+boxlength*2.68);
+						ctx.stroke();
+					}
+				}
+			}
+		}
+		function playButtonClicked() {
+			if(event.pageX >= 350 && event.pageX <= 550 && event.pageY >= 350 && event.pageY <= 400) {
+				ctx.clearRect(0,0,900,700);
+				draw();
+			}
+		}
+		draw();
+	</script>
+</body>
+</html>
