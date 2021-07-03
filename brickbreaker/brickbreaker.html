@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title> Brick Breaker </title>
+</head>
+<body>
+	<canvas id = "mycanvas" width = "800px" height = "600px" style = "border: 1px solid black;"> </canvas>
+	<img src="brick.jpeg" id="brick">
+	<script type="text/javascript">
+		const canvas = document.getElementById("mycanvas");
+		const ctx = canvas.getContext("2d");
+		const brick = document.getElementById("brick");
+		brick.style.visibility = "hidden";
+		const gamewidth = 800;
+		const gameheight = 600;
+		var d = "abc";
+		var lives = 3;
+		document.addEventListener("keydown",direction);
+		function direction(e) {
+			if(e.which == 37 && d != "right") {
+				d="left";
+			} else if(e.which == 39 && d != "left") {
+				d="right";
+			} if(e.which == 32 && ball.speedx == 0) {
+				ball.speedx = 2;
+				ball.speedy = -2;
+			}
+		}
+		document.addEventListener("keyup",stop);
+		function stop(e) {
+			if(e.which == 37) {
+				d = "";
+			}
+			else if(e.which == 39) {
+				d = "";
+			}
+		}
+		var paddlex = gamewidth/2 -50;
+		var ball = { x : paddlex + 50, y: gameheight- 31, rad: 6, speedx: 0, speedy: 0}
+		function collision() {
+			ball.x += ball.speedx;
+			ball.y += ball.speedy;
+			if(ball.x+ball.speedx+ball.rad > gamewidth) {
+				ball.speedx*= -1;
+			} else if(ball.x-ball.rad+ball.speedx < 0) {
+				ball.speedx*= -1;
+			} else if(ball.y-ball.rad+ball.speedy < 0) {
+				ball.speedy*= -1;
+			} else if(ball.x +14 >= paddlex && ball.x <= paddlex + 114 && ball.y + ball.rad+ball.speedy == gameheight-25) {
+				ball.speedy*= -1;
+			} else if(ball.y+ball.rad > gameheight) {
+				gameover();
+			}
+		}
+		var s=0;
+		var level = [];
+		level[0] = [[0,0,0,0,0,0,0,0,0,0], [0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1],  [0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1],					 [0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1]];
+		level[1] = [[0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1],  [0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1],					 [0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1],[0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1],  				[0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1],	 [0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1], [0,1,0,1,0,1,0,1,0,1]];
+		level[2] = [ [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], 			[1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1]];
+		level[3] = [ [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], 			[1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], 				[1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1]];
+		function drawbrick() {
+			for(let i = 0; i < level[s].length; i++) {
+				for(let j = 0; j < 10; j++) {
+					if(level[s][i][j] == 1) {
+						ctx.drawImage(brick, 101 + (j*62) , 50 + (i*25), 40, 20);
+					} 
+				}
+			}
+		}
+		function collisionbrick() {
+			for(let i = 0; i < level[s].length; i++) {
+				for(let j = 0; j < 10; j++) {
+					if(ball.x >= 96 + (j*62) && ball.x <= 146 + (j*62) && level[s][i][j] == 1 && ball.y >= 46 + (i*25) && ball.y <= 79 + (i * 25)) {
+						if(ball.x >= 101 + (j*62) && ball.x <= 141 + (j*62)) {
+							level[s][i][j] = 0;
+							ball.speedy *= -1;
+							break; 
+						} else if ( ball.y >= 50 + (i*25) && ball.y <= 75 + (i * 25)){
+							level[s][i][j] = 0;
+							ball.speedx *= -1;
+							break; 
+						} else {
+							level[s][i][j] = 0;
+							ball.speedx *= -1; ball.speedy *= -1;
+							break; 
+						}
+						
+					}
+				}
+			}	
+		}
+		function add() {
+			var t = 0;
+			for(i = 0; i < level[s].length; i++) {
+				for(j = 0; j < 10; j++) {
+					t+= level[s][i][j];
+				}
+			}
+			return t;
+		}
+		function checklevel() {
+			if(add() == 0) {
+				paddlex = gamewidth/2 -50;
+				ball.x = gamewidth/2;
+				ball.y = gameheight - 25- ball.rad;
+				ball.speedx = 0;
+				ball.speedy = 0;
+				t = 0;
+				if(s != 3) { s++; }
+				else {
+					window.clearInterval(game);
+					ctx.clearRect(0,0,800,600);
+					ctx.beginPath();	
+					ctx.font = " 60px Arial";
+					ctx.fillstyle = "Red";
+					ctx.fillText("You Won" , gamewidth/2 - 120, gameheight/2 - 30);
+					ctx.stroke();
+					ctx.font = "40px Arial";
+					ctx.fillText("Play Again" , gamewidth/2 - 100, gameheight/2 + 50);
+					canvas.addEventListener("click", playButtonClicked);
+				}	
+			}
+		}
+		function gameover() {
+			lives--;
+			if(lives == 0) {
+				window.clearInterval(game);
+				ctx.clearRect(0,0,800,600);
+				ctx.beginPath();	
+				ctx.font = " 60px Arial";
+				ctx.fillstyle = "red";
+				ctx.fillText("Game Over" , gamewidth/2 - 160, gameheight/2 - 30);
+				ctx.font = "40px Arial";
+				ctx.fillText("Play Again" , gamewidth/2 - 100, gameheight/2 + 50);
+				canvas.removeEventListener("keydown", direction);
+				canvas.removeEventListener("keyup", stop);
+				canvas.addEventListener("click", playButtonClicked);
+			} else {
+				paddlex = gamewidth/2 -50;
+				ball.x = gamewidth/2;
+				ball.y = gameheight - 25- ball.rad;
+				ball.speedx = 0;
+				ball.speedy = 0;
+			}
+		}
+		function draw() {
+			ctx.clearRect(0,0,800,600);
+			ctx.beginPath();
+			ctx.fillStyle = "rgb(66, 135, 245)";
+			ctx.fillRect(paddlex, gameheight - 25,100,15);
+			ctx.fillStyle = "red";
+			ctx.arc(ball.x, ball.y,ball.rad,0 ,2*Math.PI);
+			ctx.fill();
+			ctx.stroke();
+			if(d == "left") {
+				if(paddlex >= 0) paddlex-=5;
+				if(ball.speedx == 0) ball.x = paddlex + 50;
+			} else if(d == "right") {
+				if(paddlex <= gamewidth - 100) paddlex+=5;
+				if(ball.speedx == 0) ball.x = paddlex + 50;
+			}
+			drawbrick();
+			collision();
+			collisionbrick();
+			checklevel();
+		}
+		function playButtonClicked() {
+			if(event.pageX >= gamewidth/2 - 100 && event.pageX <= gamewidth/2 + 100 && event.pageY >= gameheight/2 + 25 && event.pageY <= gameheight/2 + 70) {
+				location.reload();
+			}
+		}
+		var game = window.setInterval(draw,10);
+	</script>
+</body>
+</html>
